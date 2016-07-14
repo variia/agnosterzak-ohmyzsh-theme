@@ -127,6 +127,33 @@ prompt_battery() {
       echo -n "$fg_bold[white]$HEART$(battery_pct_remaining)%%$fg_no_bold[white]"
     fi
 
+  elif [[ $(uname) == "Darwin"  ]] ; then
+
+    function battery_pct() {
+      echo "$(pmset -g batt | tail -1 | awk '{print $2}' | tr -cd '[:digit:]')"
+    }
+
+    function battery_pct_remaining() {
+      if [ $(pmset -g batt | grep -c 'discharging') -gt 0 ] ; then
+        battery_pct
+      else
+        echo "AC Power: $(battery_pct)"
+      fi
+    }
+
+    function battery_time_remaining() {
+      echo "$(pmset -g batt | tail -1 | awk '{print $4}')"
+    }
+
+    b=$(battery_pct)
+    if [ $b -gt 40 ] ; then
+      prompt_segment green white
+    elif [ $b -gt 20 ] ; then
+      prompt_segment yellow white
+    else
+      prompt_segment red white
+    fi
+    echo -n "$fg_bold[white]$HEART$(battery_pct_remaining)%%$fg_no_bold[white]"
   fi
 }
 
